@@ -1,5 +1,18 @@
 var express = require('express');
+var cookieParser = require('cookie-parser');
+var expressSession = require('cookie-session');
+var {credentials} = require('../config');
 var dbClient = require('../db');
+
+var app = express();
+
+app.use(cookieParser(credentials.cookieSecret));
+app.use(expressSession({
+    resave : false,
+    saveUninitialized: false,
+    secret : credentials.cookieSecret,
+    key : "sessionID"
+}));
 
 var router = express.Router();
 
@@ -28,6 +41,7 @@ router.post('/', (req, res) => {
             console.log('inside else');
             if(result.rows.length)
             {
+                res.cookie('sessionID', 'extremely hard hash', {signed : true});
                 res.send(`Welcome ${result.rows[0].facultyname} to scrutinix`);
             }
             else 
